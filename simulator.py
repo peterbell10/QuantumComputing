@@ -27,14 +27,23 @@ def apply_square_matrix(mat, register, qbits):
     return w
 
 def gather(i, qbits):
+    """ 
+    From an eigenstate of the computations basis (i) this constructs the
+    corresponding eigenstate in the reduced basis consisting only of the
+    state of the qbits in the given list.
+    :param i an index into the quantum register
+    :param qbits a list of the qbits to apply a square matrix to
+    """
     j = 0
     for k, qb_pos in enumerate(qbits):
-        j = j | (((i >> qb_pos) & 1) << k)
+        a = ((i >> qb_pos) & 1) # eigenstate of the qbit at qb_pos
+        j |= (a << k) # add the eigenstate to the tensor product of states
     return j
 
 def scatter(j, qbits):
+    """ The inverse of gather"""
     i = 0
     for k, qb_pos in enumerate(qbits):
-        i = i | (((j << k) & 1) << qb_pos)
+        i |= (((j << k) & 1) << qb_pos)
     return i
     
