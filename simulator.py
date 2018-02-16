@@ -17,17 +17,19 @@ def apply_square_matrix(mat, register, qbits):
     assert len(mat.shape) == 2          # Matrix
     assert mat.shape[0] == mat.shape[1] # Square
     size = len(register)
-    w = np.zeros(size)
-    for i in range(0, size):
-        r = gather(i, qbits)
-        i0 = i & ~scatter(r, qbits)
-        for c in range(0, mat.shape[0]):
-            j = i0 | scatter(c, qbits)
-            w[i] = w[i] + mat[r, c] * register[j]
+    w = np.zeros(size, dtype=np.complex)
+    for i in range(size):
+        r = gather(i, qbits) # i in the reduced basis
+        i0 = i & ~scatter(r, qbits) # i but with all qbits in the reduced basis set to 0
+        for c in range(mat.shape[0]): # iterate over matrix columns in reduced basis
+            j = i0 | scatter(c, qbits) # translate from reduced basis to full basis using
+                                       # the qbit values from i where it isn't in the
+                                       # reduced basis
+            w[i] += mat[r, c] * register[j] # Part of the matrix-vector multiply
     return w
 
 def gather(i, qbits):
-    """ 
+    """
     From an eigenstate of the computations basis (i) this constructs the
     corresponding eigenstate in the reduced basis consisting only of the
     state of the qbits in the given list.
@@ -46,4 +48,3 @@ def scatter(j, qbits):
     for k, qb_pos in enumerate(qbits):
         i |= (((j << k) & 1) << qb_pos)
     return i
-    
