@@ -49,7 +49,6 @@ class controlled_phase_gate(gate):
         return [self.control_qbit, self.phase_qbit]
 
 class circuit:
-    
     def __init__(self):
         self.gates = []
 
@@ -65,8 +64,7 @@ class circuit:
 
     def __str__(self):
         return ' |\n'.join(str(g) for g in self.gates)
-    
-    
+
     def _add_gate(self, gate):
         """Add a single gate to the end of the circuit"""
         self.gates.append(gate)
@@ -74,7 +72,7 @@ class circuit:
 
 def hadamard(qbit):
     return circuit()._add_gate(hadamard_gate(qbit))
-        
+
 def c_phase(control_qbit, phase_qbit, phase):
     return circuit()._add_gate(controlled_phase_gate(control_qbit, phase_qbit, phase))
 

@@ -1,19 +1,31 @@
 import circuit as ci
-import scipy.sparse as sp
 import numpy as np
+import cmath
+
+def measure(register):
+    """Measure the state of a quantum register"""
+    probabilities = np.abs(register)**2
+    return np.random.choice(len(register), p=probabilities)
+
+def apply_circuit(circuit, register):
+    """Simulate the action of an entire circuit"""
+    for gate in circuit.gates:
+        register = apply_gate(gate, register)
+    return register
 
 def apply_gate(gate, register):
-    if gate.gate_type == basis_gates.hadamard:
-        return apply_hadamard(gate, quantum_register)
-    elif gate.gate_type == basis_gates.contr_phase:
-        return apply_c_phase(gate, quantum_register)
-
-
-def apply_hadamard(gate, register):
-    pass
-
+    """Simulate the action of a single basis gate"""
+    if gate.gate_type == ci.basis_gates.hadamard:
+        hadamard_matrix = (1 / cmath.sqrt(2.+0.j)) * np.array([[1.+0.j , 1.+0.j],
+                                                               [1.+0.j, -1.+0.j]])
+        return apply_square_matrix(hadamard_matrix, register, gate.operand_qbits())
+    elif gate.gate_type == ci.basis_gates.contr_phase:
+        phase_matrix = np.eye(4, dtype=np.complex)
+        phase_matrix[3, 3] = cmath.exp(2.j * cmath.pi * gate.phase)
+        return apply_square_matrix(phase_matrix, register, gate.operand_qbits())
 
 def apply_square_matrix(mat, register, qbits):
+    """Simulate the action of an arbitrary square matrix of dimension <= the register"""
     assert len(mat.shape) == 2          # Matrix
     assert mat.shape[0] == mat.shape[1] # Square
     size = len(register)
