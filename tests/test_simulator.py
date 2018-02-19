@@ -12,6 +12,7 @@ import hypothesis as hyp
 import hypothesis.strategies as strat
 import hypothesis.extra.numpy
 import cmath
+import testing_support
 
 @strat.composite
 def register_and_qbits(draw, n_qbits, max_register_width):
@@ -63,6 +64,40 @@ def test_cphase_phases_add(args, phase_1, phase_2):
         circuit.c_phase(*qbits, phase=phase_2))
     sum_phase_circuit = circuit.c_phase(*qbits, phase=phase_1 + phase_2)
     assert_circuit_circuit_equivalent(two_phase_circuit, sum_phase_circuit, register)
+
+@hyp.given(args = register_and_qbits(2, 6))
+def test_cnot(args):
+    register, qbits = args
+    cnot_circuit = circuit.c_not(qbits[1], qbits[0])
+    cnot_matrix = np.array([[1.+0.j, 0.+0.j, 0.+0.j, 0.+0.j],
+                            [0.+0.j, 1.+0.j, 0.+0.j, 0.+0.j],
+                            [0.+0.j, 0.+0.j, 0.+0.j, 1.+0.j],
+                            [0.+0.j, 0.+0.j, 1.+0.j, 0.+0.j]])
+    assert_circuit_matrix_equivalent(cnot_circuit, cnot_matrix, qbits, register)
+
+@hyp.given(r0 = testing_support.register(2))
+def test_apply_gate(r0):
+    """Compare apply_gate to a manually worked example"""
+    # This should be a controlled not gate
+    r1 = simulator.apply_gate(circuit.hadamard_gate(0), r0)
+    r2 = simulator.apply_gate(circuit.controlled_phase_gate(1, 0, 0.5), r1)
+    r3 = simulator.apply_gate(circuit.hadamard_gate(0), r2)
+
+    inv_root_2 = 1 / cmath.sqrt(2)
+    assert_close(r1, inv_root_2 * np.array([r0[0] + r0[1],
+                                            r0[0] - r0[1],
+                                            r0[2] + r0[3],
+                                            r0[2] - r0[3]]))
+
+    assert_close(r2, inv_root_2 * np.array([r0[0] + r0[1],
+                                            r0[0] - r0[1],
+                                            r0[2] + r0[3],
+                                            r0[3] - r0[2]]))
+
+    assert_close(r3, [r0[0],
+                      r0[1],
+                      r0[3],
+                      r0[2]])
 
 def assert_close(a, b):
     """Compare equality with a tolerance to allow for rounding differences"""

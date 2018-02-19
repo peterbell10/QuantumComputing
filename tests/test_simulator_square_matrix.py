@@ -12,6 +12,8 @@ import numpy.linalg
 import simulator
 import math
 
+import testing_support
+
 
 def apply_square_matrix(mat, register, qbits):
     """Implementation given in lectures as a test oracle"""
@@ -25,7 +27,7 @@ def apply_square_matrix(mat, register, qbits):
     def scatter(j, qbits):
         i = 0
         for k, qb_pos in enumerate(qbits):
-            i |= (((j << k) & 1) << qb_pos)
+            i |= (((j >> k) & 1) << qb_pos)
         return i
 
     size = len(register)
@@ -44,16 +46,9 @@ def apply_matrix_args_strategy(draw, sequential_qbits):
     As well as a list of qbits to apply the matrix to.
     """
     n_qbits = draw(strat.integers(2, 6))
-    matrix_size = draw(strat.integers(1, n_qbits - 1))
-    square_matrix = draw(hyp.extra.numpy.arrays(
-        np.complex, (2**matrix_size,2**matrix_size)))
-    hyp.assume(np.abs(square_matrix).flatten().max() <= 1e100) # Prevent overflows
-    hyp.assume(np.isfinite(square_matrix).all())
-    register = draw(hyp.extra.numpy.arrays(np.complex, 2**n_qbits))
-    norm = np.linalg.norm(register)
-    hyp.assume(np.isfinite(norm))
-    hyp.assume(norm > 1e-7)
-    register /= norm
+    matrix_size = draw(strat.integers(1, min([4, n_qbits-1])))
+    square_matrix = draw(testing_support.square_matrix(matrix_size))
+    register = draw(testing_support.register(n_qbits))
     qbits = []
     if sequential_qbits:
         qbit_start = draw(strat.integers(0, n_qbits - matrix_size))

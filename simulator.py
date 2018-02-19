@@ -58,5 +58,5 @@ def scatter(j, qbits):
     """ The inverse of gather"""
     i = 0
     for k, qb_pos in enumerate(qbits):
-        i |= (((j << k) & 1) << qb_pos)
+        i |= (((j >> k) & 1) << qb_pos)
     return i
