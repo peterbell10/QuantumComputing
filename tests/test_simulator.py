@@ -3,8 +3,6 @@
 import sys
 sys.path.append("../")
 
-import simulator
-import circuit
 import numpy as np
 import numpy.testing
 import numpy.linalg
@@ -13,16 +11,15 @@ import hypothesis.strategies as strat
 import hypothesis.extra.numpy
 import cmath
 import testing_support
+import simulator
+import circuit
+import gates
 
 @strat.composite
 def register_and_qbits(draw, n_qbits, max_register_width):
     """Strategy to generate random quantum register and qbits to operate on"""
     register_width = draw(strat.integers(n_qbits, max_register_width))
-    register = draw(hyp.extra.numpy.arrays(np.complex, 2**register_width))
-    norm = np.linalg.norm(register)
-    hyp.assume(np.isfinite(norm))
-    hyp.assume(norm > 1e-7)
-    register /= norm
+    register = draw(testing_support.register(register_width))
     qbits = draw(strat.lists(
         strat.integers(0, register_width-1), min_size=n_qbits, max_size=n_qbits, unique=True))
     return (register, qbits)
@@ -68,7 +65,7 @@ def test_cphase_phases_add(args, phase_1, phase_2):
 @hyp.given(args = register_and_qbits(2, 6))
 def test_cnot(args):
     register, qbits = args
-    cnot_circuit = circuit.c_not(qbits[1], qbits[0])
+    cnot_circuit = gates.c_not(qbits[1], qbits[0])
     cnot_matrix = np.array([[1.+0.j, 0.+0.j, 0.+0.j, 0.+0.j],
                             [0.+0.j, 1.+0.j, 0.+0.j, 0.+0.j],
                             [0.+0.j, 0.+0.j, 0.+0.j, 1.+0.j],
