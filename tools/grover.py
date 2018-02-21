@@ -1,9 +1,10 @@
 import os
 from dirac import *
-from qutip import snot
+import math
 os.system('clear')
 
-bits = 4
+bits = 5
+searchval = '00100'
 
 # create |0>
 ket0 = ket('0')
@@ -14,30 +15,26 @@ print('-register-\n', register, '\n')
 
 # H ** (tensor * number of bits)
 hada_full = hadamard(bits)
-#hada_full = snot(bits).data.toarray()
 #print('\n-hada_full-\n', hada_full)
-
 
 # full superposition of the register ex: H**(tensor-3) on |000>
 register = np.matmul(hada_full, register)
 print('\n-register post-\n', register, '\n')
 
-oracle = oracle('0001')
+oracle = oracle(searchval)
 #print('\n-oracle-\n', oracle)
 
 _diffuse = diffuse(register)
 #print('\n-diffuse-\n', _diffuse)
 
-register = np.matmul(oracle, register)
-register = np.matmul(_diffuse, register)
+num_iters = (math.pi/4)*math.sqrt(2**bits)
+if num_iters == 0:
+    num_iters = 1
+print('will iterate ', str(round(num_iters)), ' (', str(num_iters), ') times')
 
-print(register)
+for i in range(0, round(num_iters)):
+    register = np.matmul(oracle, register)
+    register = np.matmul(_diffuse, register)
+    print(register)
 
 
-'''
-TODO
-1. apply oracle
-2. apply diffuce
-3. iterate 1,2
-3. measure
-'''

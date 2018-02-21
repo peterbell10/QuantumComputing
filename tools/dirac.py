@@ -17,10 +17,10 @@ def tensor(a, b):
     return space
 
 def tensor_self(a, n=2):
-    staticKet = np.array(a)
+    static = np.array(a)
     space = np.array(a)
     for i in range(1, n):
-        space = tensor(space, staticKet)
+        space = tensor(space, static)
     return space
 
 def hadamard(N=1):
