@@ -19,7 +19,7 @@ class grover:
         self._target_state = target_state
         self._iterate_op = self._grover_iterate()
         self._iterations = 0
-        self._required_iterations = int((math.pi / 4) * (2**(n_qbits / 2)))
+        self._required_iterations = int(np.round(((math.pi / 4) * (2**(n_qbits / 2))), 0))
         self._register = np.zeros(2**(n_qbits + 1), dtype=np.complex)
         self._register[2**n_qbits] = 1.0
         self._register = apply_circuit(self._hadamard_gate(), self._register)
@@ -81,6 +81,13 @@ class grover:
             self.do_iteration()
             print self.get_state()
 
+    def ret_states(self):
+        """Return list of registers for every step of Grover's algorithm"""
+        states = [self.get_state()]
+        while self._iterations < self._required_iterations:
+            self.do_iteration()
+            states.append(self.get_state())
+        return states
 if __name__ == '__main__':
     g = grover(4, 6)
     g.execute()
