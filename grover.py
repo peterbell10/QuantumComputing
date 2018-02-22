@@ -83,11 +83,14 @@ class grover:
 
     def ret_states(self):
         """Return list of registers for every step of Grover's algorithm"""
-        states = [self.get_state()]
+        init_state = np.zeros(2**(self._n_qbits + 1), dtype=np.complex)
+        init_state[2**self._n_qbits] = 1.0
+        states = [init_state[2**self._n_qbits : 2**(self._n_qbits + 1)], self.get_state()]
         while self._iterations < self._required_iterations:
             self.do_iteration()
             states.append(self.get_state())
         return states
+
 if __name__ == '__main__':
     g = grover(4, 6)
     g.execute()
