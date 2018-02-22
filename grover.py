@@ -64,10 +64,10 @@ class grover:
     def _grover_iterate(self):
         """Returns a single iteration of grover's algorithm"""
         return (
+            self._reflection(self._target_state) |
             self._hadamard_gate() |
             self._reflection(0) |
-            self._hadamard_gate() |
-            self._reflection(self._target_state))
+            self._hadamard_gate())
 
     def do_iteration(self):
         """Apply a single iteration of grover's algorithm to the internal state"""
