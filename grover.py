@@ -8,10 +8,12 @@ import math
 
 
 class grover:
+    """Class implementing Grover's database search algorithm"""
     def __init__(self, n_qbits, target_state):
         """Initialise grover's algorithm
-        :param n_qbits The width of the quantum register
-        :param target_state The value being searched for
+
+        :param int n_qbits: The width of the quantum register
+        :param int target_state: The value being searched for
         """
         assert n_qbits > 1 # Wouldn't be much of a search, would it
         # Need an extra qbit that is always |1> to implement an unconditional not

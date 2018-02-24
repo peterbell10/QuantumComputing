@@ -1,0 +1,6 @@
+=========
+Simulator
+=========
+
+.. automodule:: simulator
+   :members:
