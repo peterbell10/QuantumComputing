@@ -3,18 +3,32 @@ import numpy as np
 import cmath
 
 def measure(register):
-    """Measure the state of a quantum register"""
+    """Measure the state of a quantum register
+
+    :param numpy.array register: The state of the quantum register being measured
+    :returns int: The measured eigenvalue
+    """
     probabilities = np.abs(register)**2
     return np.random.choice(len(register), p=probabilities)
 
 def apply_circuit(circuit, register):
-    """Simulate the action of an entire circuit"""
+    """Simulate the action of an entire circuit
+
+    :param circuit.circuit circuit: The circuit to apply
+    :param numpy.array register: The quantum register to apply the :class:`circuit` to
+    :returns numpy.array: The new quantum register state
+    """
     for gate in circuit.gates:
         register = apply_gate(gate, register)
     return register
 
 def apply_gate(gate, register):
-    """Simulate the action of a single basis gate"""
+    """Simulate the action of a single basis gate
+
+    :param circuit.gate gate: The gate to apply
+    :param numpy.array register: The quantum register to apply the :class:`gate` to
+    :returns numpy.array: The new quantum register state
+    """
     if isinstance(gate, ci.hadamard_gate):
         hadamard_matrix = (1 / cmath.sqrt(2.+0.j)) * np.array([[1.+0.j , 1.+0.j],
                                                                [1.+0.j, -1.+0.j]])
@@ -25,7 +39,12 @@ def apply_gate(gate, register):
         return apply_square_matrix(phase_matrix, register, gate.operand_qbits())
 
 def apply_square_matrix(mat, register, qbits):
-    """Simulate the action of an arbitrary square matrix of dimension <= the register"""
+    """Simulate the action of a square matrix
+
+    :param numpy.array mat: A square matrix with power of 2 dimensions :math:`\leq` the register
+    :param numpy.array register: The quantum register to apply the matrix to
+    :returns numpy.array: The new quantum register state
+    """
     assert len(mat.shape) == 2          # Matrix
     assert mat.shape[0] == mat.shape[1] # Square
     size = len(register)
@@ -45,8 +64,9 @@ def gather(i, qbits):
     From an eigenstate of the computations basis (i) this constructs the
     corresponding eigenstate in the reduced basis consisting only of the
     state of the qbits in the given list.
-    :param i an index into the quantum register
-    :param qbits a list of the qbits to apply a square matrix to
+
+    :param int i: an index into the quantum register
+    :param list qbits: List of the qbits to apply a square matrix to
     """
     j = 0
     for k, qb_pos in enumerate(qbits):
@@ -55,7 +75,11 @@ def gather(i, qbits):
     return j
 
 def scatter(j, qbits):
-    """ The inverse of gather"""
+    """The inverse of :func:`gather`
+
+    :param int j: Eigenstate in the reduced basis
+    :param list qbits: Index of the qbits that make up the reduced basis
+    """
     i = 0
     for k, qb_pos in enumerate(qbits):
         i |= (((j >> k) & 1) << qb_pos)
