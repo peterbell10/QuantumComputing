@@ -15,11 +15,11 @@ def apply_circuit(circuit, register):
 
 def apply_gate(gate, register):
     """Simulate the action of a single basis gate"""
-    if gate.gate_type == ci.basis_gates.hadamard:
+    if isinstance(gate, ci.hadamard_gate):
         hadamard_matrix = (1 / cmath.sqrt(2.+0.j)) * np.array([[1.+0.j , 1.+0.j],
                                                                [1.+0.j, -1.+0.j]])
         return apply_square_matrix(hadamard_matrix, register, gate.operand_qbits())
-    elif gate.gate_type == ci.basis_gates.contr_phase:
+    elif isinstance(gate, ci.controlled_phase_gate):
         phase_matrix = np.eye(4, dtype=np.complex)
         phase_matrix[3, 3] = cmath.exp(2.j * cmath.pi * gate.phase)
         return apply_square_matrix(phase_matrix, register, gate.operand_qbits())

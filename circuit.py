@@ -1,26 +1,10 @@
-
-class basis_gates:
-    hadamard = 0  # Hadamard
-    contr_phase = 1  # Controlled-phase gate
-
-    @staticmethod
-    def to_string(gate):
-        return {
-            basis_gates.hadamard:"Hadamard",
-            basis_gates.contr_phase:"Controlled-phase"
-        }[gate]
-
 class gate:
-    def __init__(self, gate_type):
-        self.gate_type = int(gate_type)
-
     def operand_qbits(self):
         """Returns a list of all qbits this gate operates on"""
         raise NotImplementedError()
 
 class hadamard_gate(gate):
     def __init__(self, qbit):
-        gate.__init__(self, basis_gates.hadamard)
         self.qbit = int(qbit)
 
     def __str__(self):
@@ -30,13 +14,13 @@ class hadamard_gate(gate):
         return [self.qbit]
 
 class controlled_phase_gate(gate):
+    """Represents a binary controlled phase gate"""
     def __init__(self, control_qbit, phase_qbit, phase):
-        """Represents a binary controlled phase gate
-        :param control_qbit index of the qbit determining whether the phase shift occurs
-        :param phase_qbit index of the qbit to apply the phase change to
-        :param phase phase change to apply **in turns**. i.e. 1 turn is a phase change of 2:math`\pi`
         """
-        gate.__init__(self, basis_gates.contr_phase)
+        :param int control_qbit: index of the qbit determining whether the phase shift occurs
+        :param int phase_qbit: index of the qbit to apply the phase change to
+        :param float phase: phase change to apply in *turns*. i.e. 1 turn is a phase change of :math:`2\pi`
+        """
         self.control_qbit = control_qbit
         self.phase_qbit = phase_qbit
         self.phase = phase
