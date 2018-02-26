@@ -9,7 +9,7 @@ import hypothesis.extra.numpy
 import numpy as np
 import numpy.testing
 import numpy.linalg
-import simulator
+from sim_py import sim_py
 import math
 
 import testing_support
@@ -62,7 +62,7 @@ def apply_matrix_args_strategy(draw, sequential_qbits):
 def test_matches_oracle(args):
     """Test that the simulator apply matches the implementation from lectures"""
     np.testing.assert_allclose(
-        simulator.apply_square_matrix(*args),
+        sim_py().apply_square_matrix(*args),
         apply_square_matrix(*args),
         atol=1e-5
     )
