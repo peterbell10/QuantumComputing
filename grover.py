@@ -3,13 +3,13 @@ import numpy as np
 
 from circuit import circuit, hadamard
 from gates import cn_phase, c_not
-from simulator import apply_circuit, measure
+from sim_py import sim_py
 import math
 
 
 class grover:
     """Class implementing Grover's database search algorithm"""
-    def __init__(self, n_qbits, target_state):
+    def __init__(self, n_qbits, target_state, sim=sim_py()):
         """Initialise grover's algorithm
 
         :param int n_qbits: The width of the quantum register
@@ -24,7 +24,8 @@ class grover:
         self._required_iterations = int(np.round(((math.pi / 4) * (2**(n_qbits / 2))), 0))
         self._register = np.zeros(2**(n_qbits + 1), dtype=np.complex)
         self._register[2**n_qbits] = 1.0
-        self._register = apply_circuit(self._hadamard_gate(), self._register)
+        self._register = sim.apply_circuit(self._hadamard_gate(), self._register)
+        self._sim = sim
 
     def get_state(self):
         """Returns the current state of grover's algorithm"""
@@ -73,7 +74,7 @@ class grover:
 
     def do_iteration(self):
         """Apply a single iteration of grover's algorithm to the internal state"""
-        self._register = apply_circuit(self._iterate_op, self._register)
+        self._register = self._sim.apply_circuit(self._iterate_op, self._register)
         self._iterations += 1
 
     def execute(self):
@@ -93,7 +94,11 @@ class grover:
             states.append(self.get_state())
         return states
 
+    def measure(self):
+        """Measure the current state"""
+        return self._sim.measure(self.get_state())
+
 if __name__ == '__main__':
     g = grover(4, 6)
     g.execute()
-    print 'Measured result: {}'.format(measure(g.get_state()))
+    print 'Measured result: {}'.format(g.measure())
