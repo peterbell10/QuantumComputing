@@ -20,7 +20,7 @@ class simulator:
         :returns numpy.array: The new quantum register state
         """
         for gate in circuit.gates:
-            register = apply_gate(gate, register)
+            register = self.apply_gate(gate, register)
         return register
 
     def apply_gate(self, gate, register):
@@ -31,7 +31,7 @@ class simulator:
         :returns numpy.array: The new quantum register state
         """
         if isinstance(gate, ci.hadamard_gate):
-            self.apply_hadamard(gate, register)
+            return self.apply_hadamard(gate, register)
         elif isinstance(gate, ci.controlled_phase_gate):
             return self.apply_controlled_phase(gate, register)
 
