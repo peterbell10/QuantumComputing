@@ -9,7 +9,7 @@ bool is_bit_set(const int number, const int bit)
 
 __kernel void hadamard(
 	const unsigned qbit, __global cdouble_t * in_reg,
-	__global cdouble_t * out_reg, const unsigned count)               
+	__global cdouble_t * out_reg, const unsigned count)
 {
 	const int i = get_global_id(0);
 	if (i >= count)
@@ -18,7 +18,7 @@ __kernel void hadamard(
 	}
 
 	const unsigned i0 = i & ~(1 << qbit);
-	const unsigned i1 = i & (1 << qbit);
+	const unsigned i1 = i | (1 << qbit);
 	const cdouble_t temp;
 
 	if (is_bit_set(i, qbit))
