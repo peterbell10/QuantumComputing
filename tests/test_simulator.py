@@ -17,9 +17,11 @@ import circuit
 import gates
 
 from sim_py import sim_py
+from sim_nomat import sim_nomat
 
+# Tests with a "sim" parameter will be called with each of these
 @pytest.fixture(scope='module',
-                params=[sim_py] # Tests with a "sim" parameter will be called with each of these
+                params=[sim_py, sim_nomat]
 )
 def sim(request):
     return request.param()
