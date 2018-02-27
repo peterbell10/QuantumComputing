@@ -3,4 +3,3 @@ Gates
 =====
 
 .. automodule:: gates
-   :members:

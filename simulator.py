@@ -3,6 +3,7 @@ import numpy as np
 import cmath
 
 class simulator:
+    """Abstract base class for quanum circuit simulators"""
     def measure(self, register):
         """Measure the state of a quantum register
 
@@ -16,7 +17,7 @@ class simulator:
         """Simulate the action of an entire circuit
 
         :param circuit.circuit circuit: The circuit to apply
-        :param numpy.array register: The quantum register to apply the :class:`circuit` to
+        :param numpy.array register: The quantum register to apply the :class:`circuit.circuit` to
         :returns numpy.array: The new quantum register state
         """
         for gate in circuit.gates:
@@ -27,7 +28,7 @@ class simulator:
         """Simulate the action of a single basis gate
 
         :param circuit.gate gate: The gate to apply
-        :param numpy.array register: The quantum register to apply the :class:`gate` to
+        :param numpy.array register: The quantum register to apply the :class:`circuit.gate` to
         :returns numpy.array: The new quantum register state
         """
         if isinstance(gate, ci.hadamard_gate):
@@ -39,7 +40,7 @@ class simulator:
         """Simulate the action of a single qbit hadamard gate
 
         :param circuit.hadamard_gate gate: The gate to apply
-        :param numpy.array register: The quantum register to apply the :class:`hadamard_gate` to
+        :param numpy.array register: The quantum register to apply the :class:`circuit.hadamard_gate` to
         :returns numpy.array: The new quantum register state
         """
         raise NotImplementedError()
@@ -48,7 +49,7 @@ class simulator:
         """Simulate the action of a two qbit controlled-phase gate
 
         :param citcuit.controlled_phase_gate gate: The gate to apply
-        :param numpy.array register: The quantum register to apply the :class:`controlled_phase_gate` to
+        :param numpy.array register: The quantum register to apply the :class:`circuit.controlled_phase_gate` to
         :returns numpy.array: The new quantum register state
         """
         raise NotImplementedError()

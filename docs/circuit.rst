@@ -3,5 +3,5 @@ Circuit
 =======
 
 .. automodule:: circuit
-   :members:
    :special-members:
+   :exclude-members: __module__, __str__
