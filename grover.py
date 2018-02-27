@@ -40,7 +40,7 @@ class grover:
         return c_not(self._n_qbits, not_qbit)
 
     def _conditional_phase_gate(self):
-        """Returns a reflection in the |2^n_qbits - 1> direction"""
+        """Returns a reflection in the :math:`|2^{n\\_qbits} - 1>` direction"""
         return cn_phase(range(1, self._n_qbits), 0, 0.5)
 
     def _hadamard_gate(self):
