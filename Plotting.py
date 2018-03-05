@@ -36,7 +36,7 @@ def first_hadamard_operation():
 
     plt.subplots_adjust(bottom=0.27, right=0.8, left=0.15)
     # plt.savefig('Report/1st_hadamard_operation.png', facecolor='none')
-    plt.savefig('Report/1st_hadamard_operation_transparent.png', transparent=True)
+    plt.savefig('Report/1st_hadamard_operation_transparent.pdf', transparent=True)
 
 def oracle():
 
@@ -78,7 +78,7 @@ def oracle():
 
     plt.subplots_adjust(bottom=0.27, right=0.8, left=0.15)
     # plt.savefig('Report/1st_hadamard_operation.png', facecolor='none')
-    plt.savefig('Report/oracle_transparent.png', transparent=True)
+    plt.savefig('Report/oracle_transparent.pdf', transparent=True)
 
 def diffusion():
 
@@ -118,7 +118,7 @@ def diffusion():
     plt.text(x=-2, y=0.7, s=r'$\alpha_{|101\rangle} = \frac{5}{4\sqrt{2}}$', fontsize=14)
 
     plt.subplots_adjust(bottom=0.27, right=0.8, left=0.15)
-    plt.savefig('Report/diffusion_transparent.png', transparent=True)
+    plt.savefig('Report/diffusion_transparent.pdf', transparent=True)
 
 def second_iteration():
 
@@ -161,10 +161,10 @@ def second_iteration():
 
     plt.subplots_adjust(bottom=0.175, right=0.8, left=0.15)
     # plt.savefig('Report/1st_hadamard_operation.png', facecolor='none')
-    plt.savefig('Report/2nd_iteration_2_transparent.png', transparent=True)
+    plt.savefig('Report/2nd_iteration_2_transparent.pdf', transparent=True)
 
-# oracle()
-# first_hadamard_operation()
-# diffusion()
+oracle()
+first_hadamard_operation()
+diffusion()
 second_iteration()
 # plt.show()
