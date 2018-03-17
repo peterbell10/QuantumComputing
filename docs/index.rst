@@ -15,6 +15,7 @@ Contents:
    gates
    simulator
    grover
+   qasm
 
 
 
