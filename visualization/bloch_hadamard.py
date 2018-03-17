@@ -8,7 +8,7 @@ from circuit import circuit, hadamard, c_phase
 from gates import cn_phase, c_not
 from sim_py import sim_py
 
-initial_state = 1 # 0 or 1
+initial_state = 0 # 0 or 1
 n_qbits = 1
 
 i_state = basis(2, initial_state)
