@@ -16,6 +16,7 @@ Contents:
    simulator
    grover
    shor
+   qasm
 
 
 
