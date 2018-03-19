@@ -2,14 +2,15 @@ import numpy as np
 
 from circuit import circuit, hadamard, c_phase
 from gates import cn_phase, c_not
-from sim_py import sim_py
+from sim_nomat import sim_nomat
 import math
 from fractions import gcd
 import matplotlib.pyplot as plt
+import random
 
 class quantum_period_finder:
     """Implements the quantum period finding part of Shor's algorithm."""
-    def __init__(self, N, sim=sim_py()):
+    def __init__(self, N, sim=sim_nomat()):
         """Initialise quantum registers for Shor's algorithm.
 
         :param int N: The number to be factorised
@@ -97,40 +98,55 @@ class quantum_period_finder:
         reg_meas = self._sim.measure(self._register)
         return self._get_low_word(reg_meas)
 
+
 class shor:
-    """Class implementing Shor's algorithm"""
+    """Implements Shor's algorithm for integer factorisation"""
 
     def __init__(self, N):
         # Prime factors need to exist
-        assert N > 1
+        assert N > 2
+        assert self.is_prime(N) == False, 'number should not be a prime'
         self._N = N
 
     def choose_base(self):
-        a = np.random.randint(low=2, high=self._N)
-        while gcd(a, self._N) != 1:
-            print("%s is a nontrivial factor" % gcd(a, self._N))
-            a = np.random.randint(low=2, high=self._N)
-        return a
+        """
+        Returns a random base to be used in Shor's algorithm.
+        Ensures that the base and N are coprime.
 
-    def check_prime(self):
-        # TODO check if N is power of a prime
-        if self._N <= 1:
+        :returns: The base
+        :rtype: `int`
+        """
+        assert self._N > 2
+        while True:
+            base = random.randrange(2, self._N)
+            #if gcd(base, self._N) == 1:
+            return base
+
+            # This means we've found a nontrivial factor but we want to utilise
+            # our quantum computer and so just ignore it.
+
+    @staticmethod
+    def is_prime(x):
+        """Returns `True` if x is prime"""
+        if x <= 1:
             return False
-        elif self._N <=3:
+        elif x <=3:
             return True
-        elif self._N % 2 == 0 or self._N % 3 == 0:
+        elif x % 2 == 0 or x % 3 == 0:
             return False
+
         i = 5
-        while i * i <= self._N:
-            if self._N % i ==0 or self._N % (i+2) == 0:
+        while i * i <= x:
+            if x % i == 0 or x % (i+2) == 0:
                 return False
             i += 6
         return True
 
-    def denominator(self, x, qmax):
+    @staticmethod
+    def denominator(x, qmax):
         r"""
         Finds the denominator :math:`q` of the rational number :math:`\frac{p}{q}` that best satisfies
-        :math:`x \approx \frac{p}{q}` and :math:`q \lt q_max`
+        :math:`x \approx \frac{p}{q}` and :math:`q \lt q_{max}`
         """
         y = x
         q0 = q1 = q2 = 1
@@ -148,49 +164,60 @@ class shor:
             q0, q1 = q1, q2
 
     def run_shor(self):
-        assert self.check_prime() == False, "number should not be a prime"
-
         while True:
-            a = self.choose_base()
-            print "N is %s and chosen (a) is %s with gcd of %s\n" % (self._N, a, gcd(a, self._N))
+            base = self.choose_base()
+            print 'N is {} and exponent base (a) was chosen as {}'.format(self._N, base,)
 
+            inv_period = quantum_period_finder(self._N).estimate_inverse_period(base)
 
-            # apply final classical number processing
+            # Final classical number processing
 
-            y = quantum_period_finder(self._N).estimate_inverse_period(a)
-            Q = 2 ** math.ceil(math.log(self._N, 2))
-            s = self.denominator(y, Q)
+            # Modulus for binary with just enough bits to fit N
+            binary_modulus = 2 ** math.ceil(math.log(self._N, 2))
 
-            print 'y = {}, Q = {}, s = {}'.format(y, Q, s)
+            def find_exact_period():
+                # The period should be some multiple of the denominator
+                period_base = self.denominator(inv_period, binary_modulus)
 
-            def _():
-                n = 1
-                s_n = s * n
-                while s_n < Q:
-                    if (a ** s_n) % self._N == 1:
-                        # s_n is the period of the function
-                        return s_n
-                    n += 1
-                    s_n = s * n
+                i = 1
+                period_candidate = period_base * i
+                while period_candidate < binary_modulus:
+                    if (base ** period_candidate) % self._N == 1:
+                        # Confirmed to be the true period
+                        return period_candidate
+                    i += 1
+                    period_candidate = period_base * i
 
                 # Can't find a solution, return an odd number so it'll be rejected
                 return 1
 
-            r = _()
+            period = find_exact_period()
 
-            if r % 2 == 1:
+            # period must be even for base^{r/2} to be a whole power of `base`
+            if period % 2 == 1:
                 continue
 
-            a_hr = a ** (r / 2)
-            if a_hr % self._N == self._N - 1:
+
+            # We know that x^2 = 1 (mod N), so (x - 1)(x + 1) = 0 (mod N)
+            x = base ** (period / 2)
+
+            # We know that x != 1 (mod N) because then r/2 would have been the period.
+            # However, it might be that x == -1 (mod N), in which case the above equation
+            # will include a multiplication by 0 (mod N) and not give a useful solution.
+            if x % self._N == self._N - 1:  # i.e. -1 (mod N)
                 continue
 
-            print 'factor are: {}'.format([gcd(a_hr + 1, self._N), gcd(a_hr - 1, self._N)])
-            break
+            # Return the factors of N
+            return [gcd(x + 1, self._N), gcd(x - 1, self._N)]
 
 
 
 
 if __name__ == '__main__':
-    s = shor(77)
-    s.run_shor()
+    N = input('Enter a number to be factorised: ')
+    if type(N) != int or N <= 0:
+        print 'The number to factorise should be a positive integer'
+    else:
+        s = shor(N)
+        factors = s.run_shor()
+        print 'The factors were: {}'.format(factors)
