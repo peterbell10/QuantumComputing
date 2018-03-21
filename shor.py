@@ -93,7 +93,7 @@ class quantum_period_finder:
         """
         :param int i: The two word register value to extract the low word from
         :returns: The low word of `i`
-        :rtype:: int
+        :rtype: int
         """
         return i & self._low_mask()
 
@@ -110,7 +110,7 @@ class quantum_period_finder:
         """
         :param int i: The two word register value to extract the high word from
         :returns: The high word of `i`
-        :rtype:: int
+        :rtype: int
         """
         return (i & self._high_mask()) >> self._word_qbits
 
