@@ -30,7 +30,7 @@ class quantum_period_finder:
     def _QFT(self, inv=False):
         """Constructs the circuit for a quantum fourier transform (QFT).
 
-        :param bool inv: If `True`, returns an inverse QFT (default `False`)
+        :param bool inv: If `True`, returns an inverse QFT
         :returns: QFT circuit
         :rtype: circuit.circuit
         """
@@ -84,7 +84,14 @@ class quantum_period_finder:
 
         self._register = new_reg
 
-    def estimate_inverse_period(self, a):
+    def estimate_frequency(self, a):
+        """
+        Uses quantum methods to find some integer multiple of the frequency of the
+        modular exponentiation of a with high probability.
+
+        :returns: The estimated frequency
+        :rtype: `int`
+        """
 
         self._prepare_register()
 
@@ -92,7 +99,7 @@ class quantum_period_finder:
         self._cheaty_f_map(a)
 
         # apply the inverse QFT to the lower word in the register
-        self._register = self._sim.apply_circuit(self._QFT(inv=True), self._register)
+        self._register = self._sim.apply_circuit(self._QFT(), self._register)
 
         # measure the register state and extract the estimate for the inverse period
         reg_meas = self._sim.measure(self._register)
@@ -103,30 +110,28 @@ class shor:
     """Implements Shor's algorithm for integer factorisation"""
 
     def __init__(self, N):
+        """
+        Initialise Shor's algorithm with the number to be factorised(:math:`N`)
+
+        :param int N: The number to be factorised
+        """
         # Prime factors need to exist
         assert N > 2
-        assert self.is_prime(N) == False, 'number should not be a prime'
+        assert self._is_prime(N) == False, 'number should not be a prime'
         self._N = N
 
-    def choose_base(self):
+    def _choose_base(self):
         """
         Returns a random base to be used in Shor's algorithm.
-        Ensures that the base and N are coprime.
 
         :returns: The base
         :rtype: `int`
         """
         assert self._N > 2
-        while True:
-            base = random.randrange(2, self._N)
-            #if gcd(base, self._N) == 1:
-            return base
-
-            # This means we've found a nontrivial factor but we want to utilise
-            # our quantum computer and so just ignore it.
+        return random.randrange(2, self._N)
 
     @staticmethod
-    def is_prime(x):
+    def _is_prime(x):
         """Returns `True` if x is prime"""
         if x <= 1:
             return False
@@ -143,7 +148,7 @@ class shor:
         return True
 
     @staticmethod
-    def denominator(x, qmax):
+    def _denominator(x, qmax):
         r"""
         Finds the denominator :math:`q` of the rational number :math:`\frac{p}{q}` that best satisfies
         :math:`x \approx \frac{p}{q}` and :math:`q \lt q_{max}`
@@ -164,20 +169,32 @@ class shor:
             q0, q1 = q1, q2
 
     def run_shor(self):
+        """
+        Evaluates Shor's factorisation algorithm with the number :math:`N` associated with the class.
+
+        :returns: Two factors of :math:`N`
+        :rtype: `list`
+        """
         while True:
-            base = self.choose_base()
+            base = self._choose_base()
+            if (gcd(base, self._N) != 1):
+                # If the base is a factor then we are done
+                factor_a = gcd(base, self._N)
+                return [factor_a, self._N / factor_a]
+
             print 'N is {} and exponent base (a) was chosen as {}'.format(self._N, base,)
 
-            inv_period = quantum_period_finder(self._N).estimate_inverse_period(base)
+            inv_period = quantum_period_finder(self._N).estimate_frequency(base)
 
             # Final classical number processing
 
             # Modulus for binary with just enough bits to fit N
-            binary_modulus = 2 ** math.ceil(math.log(self._N, 2))
+            # Note floor(x) + 1 != ceil(x) when x is already an integer
+            binary_modulus = 2 ** math.floor(math.log(self._N, 2)) + 1
 
             def find_exact_period():
                 # The period should be some multiple of the denominator
-                period_base = self.denominator(inv_period, binary_modulus)
+                period_base = self._denominator(inv_period, binary_modulus)
 
                 i = 1
                 period_candidate = period_base * i
@@ -188,7 +205,7 @@ class shor:
                     i += 1
                     period_candidate = period_base * i
 
-                # Can't find a solution, return an odd number so it'll be rejected
+                # Can't find a solution, return an odd number so it'll be rejected later
                 return 1
 
             period = find_exact_period()
