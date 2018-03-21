@@ -11,7 +11,8 @@ import random
 class quantum_period_finder:
     """Implements the quantum period finding part of Shor's algorithm."""
     def __init__(self, N, sim=sim_nomat()):
-        """Initialise quantum registers for Shor's algorithm.
+        """
+        Initialise quantum registers for Shor's algorithm.
 
         :param int N: The number to be factorised
         """
@@ -23,12 +24,11 @@ class quantum_period_finder:
         self._n_qbits = 2 * self._word_qbits
 
         self._N = N
-        self._register = np.zeros(2**(self._n_qbits), dtype=np.complex)
-        self._register[0] = 1.0
         self._sim = sim
 
     def _QFT(self, inv=False):
-        """Constructs the circuit for a quantum fourier transform (QFT).
+        """
+        Constructs the circuit for a quantum fourier transform (QFT).
 
         :param bool inv: If `True`, returns an inverse QFT
         :returns: QFT circuit
@@ -45,33 +45,95 @@ class quantum_period_finder:
         return qft
 
     def _hadamard_low_word(self):
+        """
+        Returns a hadamard gate that acts on all of the qbits in the low word.
+
+        :returns: The hadamard circuit
+        :rtype: :class:`circuit.circuit`
+        """
         had = circuit()
         for i in range(self._word_qbits):
             had | hadamard(i)
         return had
 
     def _prepare_register(self):
+        r"""
+        Puts the register in the initial state for the period estimation routine.
+        That is, the state
+
+        .. math::
+
+           |\psi{}\rangle = \frac{1}{\sqrt{2^q}}\sum_{i=0}^{2^q - 1} |i, 0\rangle
+
+        where :math:`q` is the word size.
+        """
+        self._register = np.zeros(2**(self._n_qbits), dtype=np.complex)
+        self._register[0] = 1.0
         self._register = self._sim.apply_circuit(self._hadamard_low_word(), self._register)
 
     def _low_mask(self):
+        """
+        Returns the bitmask for the low word of a cassical register/computational basis state.
+
+        :returns: The mask
+        :rtype: `int`
+        """
         return (1 << self._word_qbits) - 1
 
     def _high_mask(self):
+        """
+        Returns the bitmask for the high word of a classical register/computational basis state.
+
+        :returns: The mask
+        :rtype: `int`
+        """
         return ((1 << self._n_qbits) - 1) & ~self._low_mask()
 
     def _get_low_word(self, i):
+        """
+        :param int i: The two word register value to extract the low word from
+        :returns: The low word of `i`
+        :rtype:: int
+        """
         return i & self._low_mask()
 
     def _set_low_word(self, i, x):
+        """
+        :param int i: The two word register value to write the low word of
+        :param int x: The new value to write to the low word of `i`
+        :returns: `i` with the low word set to `x`
+        :rtype: int
+        """
         return (i & self._high_mask()) | (x & self._low_mask())
 
     def _get_high_word(self, i):
+        """
+        :param int i: The two word register value to extract the high word from
+        :returns: The high word of `i`
+        :rtype:: int
+        """
         return (i & self._high_mask()) >> self._word_qbits
 
     def _set_high_word(self, i, x):
+        """
+        :param int i: The two word register value to write the high word of
+        :param int x: The new value to write to the high word of `i`
+        :returns: `i` with the high word set to `x`
+        :rtype: int
+        """
         return (i & self._low_mask()) | ((x << self._word_qbits) & self._high_mask())
 
-    def _cheaty_f_map(self, a):
+    def _modular_exponentiation(self, a):
+        r"""
+        Performs the modular exponentialtion of Shor's algorithm,
+        performing the mapping
+
+        .. math::
+
+           |x, 0\rangle~\xrightarrow~|x, a^x \pmod{N}\rangle
+
+        :param int a: The base for the exponentiation
+        """
         new_reg = np.zeros_like(self._register)
         for i in range(len(self._register)):
 
@@ -96,7 +158,7 @@ class quantum_period_finder:
         self._prepare_register()
 
         # apply f-map
-        self._cheaty_f_map(a)
+        self._modular_exponentiation(a)
 
         # apply the inverse QFT to the lower word in the register
         self._register = self._sim.apply_circuit(self._QFT(), self._register)
@@ -151,7 +213,11 @@ class shor:
     def _denominator(x, qmax):
         r"""
         Finds the denominator :math:`q` of the rational number :math:`\frac{p}{q}` that best satisfies
-        :math:`x \approx \frac{p}{q}` and :math:`q \lt q_{max}`
+
+        .. math::
+
+           x &\approx \frac{p}{q} \\
+           q &\lt q_{max}
         """
         y = x
         q0 = q1 = q2 = 1
