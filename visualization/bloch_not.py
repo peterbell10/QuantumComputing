@@ -20,7 +20,7 @@ def create_point(theta, psi):
     z = np.cos(theta)
     return np.array([x, y, z])
 
-initial_state = 0 # 0 or 1
+initial_state = 1 # 0 or 1
 
 i_state = basis(2, initial_state)
 register = i_state
@@ -34,8 +34,8 @@ register0 = Qobj(sim.apply_circuit(had, register.full()))
 rot_theta0 = cmath.pi/2
 rot_theta1 = cmath.pi/2
 rot_theta2 = 0
-rot_psi0 = 0
-rot_psi1 = cmath.pi
+rot_psi0 = cmath.pi
+rot_psi1 = 0
 rot_psi2 = 0
 
 register1 = create_point(rot_theta1, rot_psi1)
