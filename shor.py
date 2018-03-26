@@ -160,8 +160,12 @@ class quantum_period_finder:
         # apply f-map
         self._modular_exponentiation(a)
 
+        np.save('shor/real_space', self._register)
+
         # apply the inverse QFT to the lower word in the register
         self._register = self._sim.apply_circuit(self._QFT(), self._register)
+
+        np.save('shor/fourier_space', self._register)
 
         # measure the register state and extract the estimate for the inverse period
         reg_meas = self._sim.measure(self._register)
